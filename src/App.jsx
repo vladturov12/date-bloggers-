@@ -66,6 +66,28 @@ export default function DateBloggers() {
   const [bloggers, setBloggers] = useState(MOCK_BLOGGERS);
   const [collaborations, setCollaborations] = useState(MOCK_COLLABORATIONS);
 
+  // Загрузка блогеров с бэкенда
+React.useEffect(() => {
+  fetch('https://web-production-8c948.up.railway.app/bloggers')
+    .then(res => res.json())
+    .then(data => {
+      console.log('Получено с бэкенда:', data);
+      // Объединяем данные с бэкенда с mock-данными для демо
+      // Бэкенд сейчас отдаёт только базовые поля, а UI ждёт больше
+      if (data.bloggers && data.bloggers.length > 0) {
+        const enriched = data.bloggers.map((b, idx) => ({
+          ...MOCK_BLOGGERS[idx % MOCK_BLOGGERS.length],
+          id: b.id,
+          name: b.name,
+          username: b.username,
+          status: b.status,
+        }));
+        setBloggers(enriched);
+      }
+    })
+    .catch(err => console.error('Ошибка загрузки:', err));
+}, []);
+  
   const updateRating = (collabId, rating) => {
     const updated = collaborations.map((c) => (c.id === collabId ? { ...c, rating } : c));
     setCollaborations(updated);
